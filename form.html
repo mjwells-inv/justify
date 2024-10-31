@@ -1,0 +1,82 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+</head>
+<body>
+    <h2>Registration Form</h2>
+    <form action="/submit" method="post">
+        <!-- Mobile Number -->
+        <label for="mobile_no">Mobile Number:</label><br>
+        <input type="tel" id="mobile_no" name="mobile_no" placeholder="Enter your mobile number" required=""><br><br>
+
+        <!-- Name -->
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required=""><br><br>
+
+        <!-- Email ID -->
+        <label for="email_id">Email ID:</label><br>
+        <input type="email" id="email_id" name="email_id" placeholder="Enter your email ID" required=""><br><br>
+
+        <!-- Highest Qualification -->
+        <label for="qualification">Highest Qualification:</label><br>
+        <input type="text" id="qualification" name="qualification" placeholder="Enter your highest qualification" required=""><br><br>
+
+        <!-- Address -->
+        <label for="address">Address:</label><br>
+        <textarea id="address" name="address" rows="4" cols="50" placeholder="Enter your address" required=""></textarea><br><br>
+
+        <!-- Course Type (Radio Buttons) -->
+        <label>Select Course Type:</label><br>
+        <input type="radio" id="online_courses" name="course_type" value="Online Courses" required="">
+        <label for="online_courses">Online Courses</label><br>
+        <input type="radio" id="offline_courses" name="course_type" value="Offline Courses">
+        <label for="offline_courses">Offline Courses</label><br>
+        <input type="radio" id="skill_development" name="course_type" value="Skill Development">
+        <label for="skill_development">Skill Development</label><br>
+        <input type="radio" id="placement" name="course_type" value="Placement">
+        <label for="placement">Placement</label><br><br>
+
+        <!-- Subcategories (Dropdown) -->
+        <label for="subcategories">Choose a Subcategory:</label><br>
+        <select id="subcategories" name="subcategories" required="">
+            <option value="">--Select a Subcategory--</option>
+        </select><br><br>
+
+        <!-- Submit Button -->
+        <input type="submit" value="Submit">
+    </form>
+
+    <!-- JavaScript for Dynamic Dropdown -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseTypeRadios = document.querySelectorAll('input[name="course_type"]');
+            const subcategoriesSelect = document.getElementById('subcategories');
+
+            const subcategories = {
+                'Online Courses': ['Web Development', 'Data Science', 'Digital Marketing'],
+                'Offline Courses': ['Classroom Training', 'Workshops', 'Seminars'],
+                'Skill Development': ['Communication Skills', 'Leadership', 'Time Management'],
+                'Placement': ['Interview Preparation', 'Resume Building', 'Career Counseling']
+            };
+
+            courseTypeRadios.forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    // Clear previous options
+                    subcategoriesSelect.innerHTML = '<option value="">--Select a Subcategory--</option>';
+
+                    if (this.checked) {
+                        const selectedSubcategories = subcategories[this.value];
+                        selectedSubcategories.forEach(function(subcategory) {
+                            const option = document.createElement('option');
+                            option.value = subcategory;
+                            option.textContent = subcategory;
+                            subcategoriesSelect.appendChild(option);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+</body></html>
