@@ -1,0 +1,116 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Flip Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #canvas {
+            border: 1px solid #000;
+            cursor: crosshair;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #pageLabel {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #flipbook {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Your Flip Book</h1>
+    <div id="pageLabel">Page One</div>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <div>
+        <button id="submitPage">Submit Page</button>
+        <button id="finishBook">Finish Book</button>
+        <button id="startFlipping" style="display: none;">Start Flipping</button>
+    </div>
+    <div id="flipbook"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const submitButton = document.getElementById('submitPage');
+        const finishButton = document.getElementById('finishBook');
+        const startFlippingButton = document.getElementById('startFlipping');
+        const pageLabel = document.getElementById('pageLabel');
+        const flipbook = document.getElementById('flipbook');
+
+        let isDrawing = false;
+        let pages = [];
+        let currentPage = 1;
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        submitButton.addEventListener('click', submitPage);
+        finishButton.addEventListener('click', finishBook);
+        startFlippingButton.addEventListener('click', startFlipping);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function submitPage() {
+            pages.push(canvas.toDataURL());
+            currentPage++;
+            pageLabel.textContent = `Page ${currentPage}`;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function finishBook() {
+            submitPage();
+            canvas.style.display = 'none';
+            submitButton.style.display = 'none';
+            finishButton.style.display = 'none';
+            startFlippingButton.style.display = 'inline-block';
+            pageLabel.style.display = 'none';
+        }
+
+        function startFlipping() {
+            startFlippingButton.style.display = 'none';
+            flipbook.style.display = 'block';
+            let currentIndex = 0;
+
+            function showNextPage() {
+                flipbook.innerHTML = `<img src="${pages[currentIndex]}" width="400" height="400">`;
+                currentIndex = (currentIndex + 1) % pages.length;
+            }
+
+            setInterval(showNextPage, 200);
+        }
+    </script>
+
+</body></html>
