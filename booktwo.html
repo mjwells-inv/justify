@@ -1,0 +1,250 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Flip Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f4f8;
+        }
+        h1 {
+            color: #333;
+        }
+        #controls {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        #colorPickerContainer {
+            margin-right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #colorPickerContainer label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        #canvasContainer {
+            position: relative;
+        }
+        #canvas {
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: crosshair;
+        }
+        #pageLabel {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #flipbook {
+            display: none;
+            margin-top: 20px;
+        }
+        #flipbook img {
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+        @media (max-width: 600px) {
+            #controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            #colorPickerContainer {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Your Flip Book</h1>
+    <div id="controls">
+        <div id="colorPickerContainer">
+            <label for="colorPicker">Select Ink Color:</label>
+            <input type="color" id="colorPicker" value="#000000">
+        </div>
+        <div id="canvasContainer">
+            <div id="pageLabel">Page One</div>
+            <canvas id="canvas" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <div>
+        <button id="submitPage">Submit Page</button>
+        <button id="finishBook">Finish Book</button>
+        <button id="startFlipping" style="display: none;">Start Flipping</button>
+        <button id="newBook" style="display: none; background-color: #f44336;">New Book</button>
+    </div>
+    <div id="flipbook"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const submitButton = document.getElementById('submitPage');
+        const finishButton = document.getElementById('finishBook');
+        const startFlippingButton = document.getElementById('startFlipping');
+        const newBookButton = document.getElementById('newBook');
+        const pageLabel = document.getElementById('pageLabel');
+        const flipbook = document.getElementById('flipbook');
+        const colorPicker = document.getElementById('colorPicker');
+
+        let isDrawing = false;
+        let pages = [];
+        let currentPage = 1;
+        let drawingColor = colorPicker.value;
+        let flipInterval;
+
+        // Initialize canvas background to white
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Event listeners for buttons
+        submitButton.addEventListener('click', submitPage);
+        finishButton.addEventListener('click', finishBook);
+        startFlippingButton.addEventListener('click', startFlipping);
+        newBookButton.addEventListener('click', newBook);
+
+        // Event listener for color picker
+        colorPicker.addEventListener('input', (e) => {
+            drawingColor = e.target.value;
+        });
+
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = drawingColor;
+
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                ctx.closePath();
+                isDrawing = false;
+            }
+        }
+
+        function submitPage() {
+            // Save current canvas as image
+            pages.push(canvas.toDataURL());
+
+            // Increment page number and update label
+            currentPage++;
+            pageLabel.textContent = `Page ${currentPage}`;
+
+            // Clear the canvas for the next page
+            clearCanvas();
+        }
+
+        function finishBook() {
+            // Ensure the last page is submitted
+            if (ctx.getImageData(0, 0, canvas.width, canvas.height).data.some(pixel => pixel !== 0)) {
+                submitPage();
+            }
+
+            // Hide drawing controls
+            document.getElementById('controls').style.display = 'none';
+            submitButton.style.display = 'none';
+            finishButton.style.display = 'none';
+            newBookButton.style.display = 'inline-block';
+
+            // Show Start Flipping button
+            startFlippingButton.style.display = 'inline-block';
+        }
+
+        function startFlipping() {
+            // Hide buttons
+            startFlippingButton.style.display = 'none';
+            newBookButton.style.display = 'none';
+
+            // Show flipbook container
+            flipbook.style.display = 'block';
+
+            let currentIndex = 0;
+
+            // Function to display next page
+            function showNextPage() {
+                flipbook.innerHTML = `<img src="${pages[currentIndex]}" width="400" height="400" alt="Page ${currentIndex + 1}">`;
+                currentIndex = (currentIndex + 1) % pages.length;
+            }
+
+            // Show first page immediately
+            showNextPage();
+
+            // Set interval for flipping pages
+            flipInterval = setInterval(showNextPage, 200);
+        }
+
+        function newBook() {
+            // Clear all stored pages
+            pages = [];
+            currentPage = 1;
+
+            // Reset canvas
+            clearCanvas();
+
+            // Reset page label
+            pageLabel.textContent = `Page One`;
+
+            // Show drawing controls
+            document.getElementById('controls').style.display = 'flex';
+            submitButton.style.display = 'inline-block';
+            finishButton.style.display = 'inline-block';
+
+            // Hide flipbook and related buttons
+            flipbook.style.display = 'none';
+            newBookButton.style.display = 'none';
+            startFlippingButton.style.display = 'none';
+
+            // Clear any existing intervals
+            if (flipInterval) {
+                clearInterval(flipInterval);
+            }
+        }
+
+        function clearCanvas() {
+            // Reset canvas to white background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+        }
+    </script>
+
+</body></html>
