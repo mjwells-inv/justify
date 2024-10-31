@@ -1,0 +1,75 @@
+<html><head>
+  <style>
+    .progress-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 20px 0;
+      position: relative;
+      transition: opacity 0.5s ease; /* For fade out effect */
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 30px;
+      background-color: #3498db;
+      transition: width 0.2s;
+      border-radius: 5px;
+    }
+
+    .progress-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body data-new-gr-c-s-check-loaded="14.1205.0" data-gr-ext-installed="">
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar" id="progressBar" style="width: 43%;"></div>
+    <div class="progress-text" id="progressText">Loading... 43%</div>
+  </div>
+
+  <script>
+    let width = 0;
+
+    function incrementProgressBar() {
+      let progressBar = document.getElementById('progressBar');
+      let progressText = document.getElementById('progressText');
+      let progressContainer = document.getElementById('progressContainer');
+
+      // Random increment between 1% and 5%
+      let increment = Math.floor(Math.random() * 5) + 1;
+      width = Math.min(width + increment, 100); // ensure width does not exceed 100
+
+      // Update the progress bar and text
+      progressBar.style.width = width + '%';
+      progressText.textContent = width < 100 
+        ? `Loading... ${width}%` 
+        : 'Completed!';
+
+      if (width < 100) {
+        // Set a random delay between increments, from 100ms to 1000ms
+        let randomDelay = Math.floor(Math.random() * 900) + 100;
+        setTimeout(incrementProgressBar, randomDelay);
+      } else {
+        // Once completed, fade out
+        setTimeout(() => {
+          progressContainer.style.opacity = '0'; // start fade out
+        }, 500);
+
+        setTimeout(() => {
+          progressContainer.style.display = 'none'; // hide completely
+        }, 1000);
+      }
+    }
+
+    window.onload = incrementProgressBar;
+  </script>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
