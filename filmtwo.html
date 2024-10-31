@@ -1,0 +1,132 @@
+<html><head>
+    <title>Vintage Film Effect</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .film-container {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+        }
+
+        .grain {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/png;base64,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') repeat;
+            opacity: 0.3;
+            animation: grain 0.8s steps(1) infinite;
+        }
+
+        .flicker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            opacity: 0;
+            animation: flicker 4s linear infinite;
+        }
+
+        .scratches {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-1%, -1%); }
+            20% { transform: translate(1%, 1%); }
+            30% { transform: translate(-2%, -2%); }
+            40% { transform: translate(3%, 0%); }
+            50% { transform: translate(-3%, 2%); }
+            60% { transform: translate(2%, -1%); }
+            70% { transform: translate(1%, 3%); }
+            80% { transform: translate(-2%, -2%); }
+            90% { transform: translate(2%, 1%); }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.1; }
+            5% { opacity: 0.2; }
+            10% { opacity: 0.1; }
+            15% { opacity: 0.3; }
+            20% { opacity: 0.1; }
+            25% { opacity: 0.2; }
+            30% { opacity: 0.1; }
+            35% { opacity: 0.1; }
+            40% { opacity: 0.2; }
+            45% { opacity: 0.1; }
+            50% { opacity: 0.3; }
+            55% { opacity: 0.1; }
+            60% { opacity: 0.2; }
+            65% { opacity: 0.1; }
+            70% { opacity: 0.2; }
+            75% { opacity: 0.1; }
+            80% { opacity: 0.2; }
+            85% { opacity: 0.1; }
+            90% { opacity: 0.2; }
+            95% { opacity: 0.1; }
+            100% { opacity: 0.1; }
+        }
+    </style>
+</head>
+<body data-new-gr-c-s-check-loaded="14.1205.0" data-gr-ext-installed="">
+    <div class="film-container">
+        <div class="grain"></div>
+        <div class="flicker"></div>
+        <canvas class="scratches" width="1711" height="1179"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.querySelector('.scratches');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createScratch() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const length = Math.random() * 100 + 50;
+            const angle = Math.random() * Math.PI * 2;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = Math.random() * 2 + 1;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(
+                x + Math.cos(angle) * length,
+                y + Math.sin(angle) * length
+            );
+            ctx.stroke();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (Math.random() < 0.3) {
+                const scratchCount = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < scratchCount; i++) {
+                    createScratch();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

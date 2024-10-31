@@ -1,0 +1,167 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        margin: 0;
+        background-color: black;
+        overflow: hidden;
+        position: relative;
+        height: 100vh;
+    }
+    #filmCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    #scratchesCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        mix-blend-mode: screen;
+    }
+    #grainCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        mix-blend-mode: overlay;
+    }
+</style>
+<title>Vintage Film Reel Effect</title>
+</head>
+<body data-new-gr-c-s-check-loaded="14.1205.0" data-gr-ext-installed="">
+<canvas id="filmCanvas" width="1711" height="1179" style="filter: brightness(0.981194);"></canvas>
+<canvas id="scratchesCanvas" width="1711" height="1179"></canvas>
+<canvas id="grainCanvas" width="1711" height="1179"></canvas>
+
+<script>
+// Set up canvas elements and contexts
+const filmCanvas = document.getElementById('filmCanvas');
+const filmCtx = filmCanvas.getContext('2d');
+
+const scratchesCanvas = document.getElementById('scratchesCanvas');
+const scratchesCtx = scratchesCanvas.getContext('2d');
+
+const grainCanvas = document.getElementById('grainCanvas');
+const grainCtx = grainCanvas.getContext('2d');
+
+let width, height;
+
+function resizeCanvas() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    filmCanvas.width = width;
+    filmCanvas.height = height;
+
+    scratchesCanvas.width = width;
+    scratchesCanvas.height = height;
+
+    grainCanvas.width = width;
+    grainCanvas.height = height;
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Draw film content (you can replace this with actual video or image content)
+function drawFilm() {
+    filmCtx.fillStyle = '#333';
+    filmCtx.fillRect(0, 0, width, height);
+    filmCtx.font = 'bold 72px monospace';
+    filmCtx.fillStyle = '#fff';
+    filmCtx.textAlign = 'center';
+    filmCtx.fillText('Vintage Film Effect', width / 2, height / 2);
+}
+
+// Create film grain
+function drawGrain() {
+    const imageData = grainCtx.createImageData(width, height);
+    const buffer32 = new Uint32Array(imageData.data.buffer);
+    const len = buffer32.length;
+    for (let i = 0; i < len; i++) {
+        if (Math.random() < 0.5) {
+            buffer32[i] = 0xffffffff;
+        } else {
+            buffer32[i] = 0xff000000;
+        }
+    }
+    grainCtx.putImageData(imageData, 0, 0);
+}
+
+// Create scratches
+class Scratch {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = Math.random() * width;
+        this.y = -Math.random() * height;
+        this.length = Math.random() * height * 0.5 + height * 0.1;
+        this.speed = Math.random() * 200 + 50;
+        this.opacity = Math.random() * 0.2 + 0.1;
+    }
+
+    update(deltaTime) {
+        this.y += this.speed * deltaTime;
+        if (this.y > height) {
+            this.reset();
+        }
+    }
+
+    draw(ctx) {
+        ctx.strokeStyle = `rgba(255,255,255,${this.opacity})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x, this.y + this.length);
+        ctx.stroke();
+    }
+}
+
+const scratches = [];
+for (let i = 0; i < 20; i++) {
+    scratches.push(new Scratch());
+}
+
+// Flickering effect
+let flickerInterval;
+function startFlicker() {
+    flickerInterval = setInterval(() => {
+        const brightness = 0.9 + Math.random() * 0.2;
+        filmCanvas.style.filter = `brightness(${brightness})`;
+    }, 100);
+}
+
+function stopFlicker() {
+    clearInterval(flickerInterval);
+}
+
+// Animation loop
+let lastTime = performance.now();
+function animate(time) {
+    const deltaTime = (time - lastTime) / 1000;
+    lastTime = time;
+
+    // Draw film content
+    drawFilm();
+
+    // Draw scratches
+    scratchesCtx.clearRect(0, 0, width, height);
+    scratches.forEach(scratch => {
+        scratch.update(deltaTime);
+        scratch.draw(scratchesCtx);
+    });
+
+    // Draw grain
+    drawGrain();
+
+    requestAnimationFrame(animate);
+}
+
+startFlicker();
+animate(lastTime);
+</script>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
