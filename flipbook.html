@@ -1,0 +1,211 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Flip Page Book Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #page-creation, #animation-area {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        #page-label {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #drawing-canvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: crosshair;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:disabled {
+            background-color: #a5d6a7;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #flipbook-display {
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            max-width: 600px;
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="page-creation">
+        <h2 id="page-label">Page One</h2>
+        <canvas id="drawing-canvas" width="600" height="400"></canvas>
+        <div class="button-group">
+            <button id="submit-page">Submit Page</button>
+            <button id="submit-book" disabled="">Submit Book</button>
+        </div>
+    </div>
+    <div id="animation-area" style="display: none;">
+        <button id="start-flipping">Start Flipping</button>
+        <img id="flipbook-display" src="" alt="Flip Book Animation" width="600" height="400">
+    </div>
+    <script>
+        (function() {
+            // Helper function to convert number to words
+            function numberToWords(n) {
+                var ones = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine"];
+                var teens = ["Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+                var tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+                var words = "";
+                if (n < 0) return "Minus " + numberToWords(-n);
+                if (n === 0) return "Zero";
+                if (n < 10) return ones[n];
+                if (n < 20) return teens[n - 10];
+                if (n < 100) {
+                    var ten = Math.floor(n / 10);
+                    var one = n % 10;
+                    words = tens[ten];
+                    if (one > 0) words += " " + ones[one];
+                    return words;
+                }
+                if (n < 1000) {
+                    var hundred = Math.floor(n / 100);
+                    var remainder = n % 100;
+                    words = ones[hundred] + " Hundred";
+                    if (remainder > 0) words += " " + numberToWords(remainder);
+                    return words;
+                }
+                // For numbers >=1000, return the number as is
+                return n.toString();
+            }
+
+            // Variables
+            var pages = [];
+            var currentPageNumber = 1;
+            var isDrawing = false;
+            var lastX = 0;
+            var lastY = 0;
+
+            // Elements
+            var pageLabel = document.getElementById('page-label');
+            var canvas = document.getElementById('drawing-canvas');
+            var ctx = canvas.getContext('2d');
+            var submitPageBtn = document.getElementById('submit-page');
+            var submitBookBtn = document.getElementById('submit-book');
+            var animationArea = document.getElementById('animation-area');
+            var startFlippingBtn = document.getElementById('start-flipping');
+            var flipbookDisplay = document.getElementById('flipbook-display');
+
+            // Initialize canvas properties
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000';
+
+            // Update initial page label
+            pageLabel.textContent = "Page " + numberToWords(currentPageNumber);
+
+            // Event listeners for drawing on the canvas
+            canvas.addEventListener('mousedown', function(e) {
+                isDrawing = true;
+                var rect = canvas.getBoundingClientRect();
+                lastX = e.clientX - rect.left;
+                lastY = e.clientY - rect.top;
+            });
+
+            canvas.addEventListener('mousemove', function(e) {
+                if (!isDrawing) return;
+                var rect = canvas.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                lastX = x;
+                lastY = y;
+            });
+
+            canvas.addEventListener('mouseup', function(e) {
+                isDrawing = false;
+            });
+
+            canvas.addEventListener('mouseleave', function(e) {
+                isDrawing = false;
+            });
+
+            // Function to handle "Submit Page" button click
+            submitPageBtn.addEventListener('click', function() {
+                // Save the current canvas drawing as a data URL
+                var dataURL = canvas.toDataURL();
+                pages.push(dataURL);
+
+                // Increment the page number for the next page
+                currentPageNumber++;
+
+                // Update the page label to the next page
+                pageLabel.textContent = "Page " + numberToWords(currentPageNumber);
+
+                // Clear the canvas for the new page
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Enable the "Submit Book" button since there's at least one page
+                submitBookBtn.disabled = false;
+            });
+
+            // Function to handle "Submit Book" button click
+            submitBookBtn.addEventListener('click', function() {
+                if (pages.length === 0) {
+                    alert("Please submit at least one page before submitting the book.");
+                    return;
+                }
+
+                // Disable the "Submit Page" and "Submit Book" buttons to finalize the book
+                submitPageBtn.disabled = true;
+                submitBookBtn.disabled = true;
+
+                // Show the animation area with the "Start Flipping" button
+                animationArea.style.display = 'block';
+            });
+
+            // Function to handle "Start Flipping" button click
+            startFlippingBtn.addEventListener('click', function() {
+                // Hide the "Start Flipping" button to initiate the animation
+                startFlippingBtn.style.display = 'none';
+
+                // Show the flipbook display area
+                flipbookDisplay.style.display = 'block';
+
+                // Initialize variables for the flipping animation
+                var currentFlipPage = 0;
+                var totalPages = pages.length;
+                if (totalPages === 0) return;
+
+                // Set an interval to cycle through the pages at approximately 15 frames per second
+                var flipInterval = setInterval(function() {
+                    flipbookDisplay.src = pages[currentFlipPage];
+                    currentFlipPage = (currentFlipPage + 1) % totalPages;
+                }, 66); // 1000ms / 15fps ≈ 66ms per frame
+
+                // The interval will loop endlessly as per the requirement
+            });
+        })();
+    </script>
+
+</body></html>
